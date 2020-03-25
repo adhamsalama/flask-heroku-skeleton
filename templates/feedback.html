@@ -10,7 +10,7 @@ Feedback
 
 <form class="needs-validation" novalidate action="/feedback" autocomplete="off" method="post">
     <div class="form-group">
-        <select class="custom-select form-control med-form" name="type" required>
+        <select class="custom-select form-control" name="type" required>
             <option value="" disabled selected>Type</option>
             <option value="bug">Bug</option>
             <option value="suggestion">Suggestion</option>
@@ -22,7 +22,7 @@ Feedback
         <div class="invalid-feedback">Please enter your email</div>
     </div>
     <div class="mb-3">
-        <textarea class="form-control med-form" placeholder="Feedback" name="feedback" required></textarea>
+        <textarea class="form-control" placeholder="Feedback" name="feedback" required></textarea>
         <div class="invalid-feedback">Please write your feedback</div>
     </div>
     <button class="btn btn-primary darkmode-ignore" type="submit">Send Feedback</button>
