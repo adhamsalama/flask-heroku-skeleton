@@ -1,17 +1,17 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{{ session["username"] }}
+{{ info['username'] }}
 {% endblock %}
 
 {% block head %}
 <div class="jumbotron jumbotron-fluid text-center">
     <div class="container">
-        <h1 class="display-4">{{ session["username"] }}.</h1>
+        <h1 class="display-4">{{ info['username'] }}.</h1>
         <p class="lead">Email:
-            {{ email }}
+            {{ info['email'] }}
             <br>
-            Account created on: {{ time }}
+            Account created on: {{ info['registeration'] }}
         </p>
     </div>
 </div>
