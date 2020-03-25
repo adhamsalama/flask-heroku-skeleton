@@ -55,7 +55,10 @@ def search():
 def profile():
     """Display user profile"""
 
-    return render_template("profile.html", )
+    # Username and email are already stored in the session, registeration time isn't, you can query for registeration time only instead
+    # Values in profile.html are from this query but you can use the values in the session instead
+    info = db.execute('SELECT * FROM users WHERE id = :id', {'id': session['user_id']}).fetchone()
+    return render_template("profile.html", info=info)
 
 
 @app.route("/feedback", methods=["GET", "POST"])
