@@ -16,29 +16,6 @@
     </div>
 </div>
 {% endblock %}
+
 {% block main %}
-<script>
-    /*$(document).ready( function () {
-    $('table').DataTable();*/
-} );
-
-    let x = document.getElementsByClassName("rating");
-    n = x.length;
-    for(let i = 0; i < n; i++){
-        let rating = x[i].innerHTML;
-
-        if(rating <= 2){
-            x[i].className += " badge badge-pill badge-danger";
-            }
-        else if(rating > 2 && rating <= 3){
-            x[i].className += " badge badge-pill badge-warning";
-            }
-        else if(rating > 3 && rating <= 4){
-            x[i].className += " badge badge-pill badge-primary";
-            }
-        else{
-            x[i].className += " badge badge-pill badge-success";
-            }
-    }
-</script>
 {% endblock %}
