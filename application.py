@@ -71,7 +71,7 @@ def feedback():
         feedback_type = request.form.get("type")
         email = request.form.get("email")
         feedback = request.form.get("feedback")
-        if not (feedback_type or email or feedback):
+        if not (feedback_type and email and feedback):
             return apology("please fill the form")
         db.execute("INSERT INTO feedback (user_id, email, feedback, feedback_type) VALUES(:id, :email, :feedback, :type)", {"id": session["user_id"], "email": email, "feedback": feedback, "type": feedback_type})
         db.commit()
@@ -224,7 +224,7 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
         email = request.form.get("email")
-        if not (username or password or confirmation or email) or password != confirmation:
+        if not (username and password and confirmation and email and password == confirmation):
             return apology("please fill the form correctly to register.")
     # Checking for username
     c = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchall()
