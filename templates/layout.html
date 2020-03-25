@@ -38,7 +38,7 @@ project_name
                 <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
                                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      User
+                      Options
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                       <a class="dropdown-item" href="/option1">Option 1</a>
@@ -46,16 +46,13 @@ project_name
                       <a class="dropdown-item" href="/option3">Option 3</a>
                     </div>
                   </li>
+                <li class="nav-item active"><a class="nav-link" href="/profile">Profile</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       Settings
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                      {% if session["email"] %}
                       <a class="dropdown-item" href="/settings/change_email">Change Email</a>
-                      {% else %}
-                      <a class="dropdown-item" href="/settings/add_email">Add Email</a>
-                      {% endif %}
                       <a class="dropdown-item" href="/settings/change_password">Change Password</a>
                       <div class="dropdown-divider"></div>
                       <a class="dropdown-item" href="/feedback">Send Feedback</a>
