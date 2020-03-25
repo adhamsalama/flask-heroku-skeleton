@@ -109,14 +109,14 @@ def change_password():
         if not password or not new_password or new_password != confirmation:
             return apology("please fill the form correctly")
         elif password == new_password:
-            return apology(message="new and old password can't be the same")
+            return apology("new and old password can't be the same")
         elif not check_password_hash(pw_hash, password):
-            return apology(message="incorrect password")
+            return apology("incorrect password")
         else:
             # Specifications for password
             # password length
             if len(new_password) < 6:
-                return apology(message="password must be longer than 6 characters")
+                return apology("password must be longer than 6 characters")
             capital = None
             lower = None
             for c in new_password:
@@ -125,13 +125,13 @@ def change_password():
                 if c.islower():
                     lower = True
             if not capital and not lower:
-                return apology(message="password must contain atleast 1 uppercase and lowercase letter")
+                return apology("password must contain atleast 1 uppercase and lowercase letter")
             # password must contain numbers
             if new_password.isalpha():
-                return apology(message="password must contain numbers")
+                return apology("password must contain numbers")
             # password must contain letters
             if new_password.isdigit():
-                return apology(message="password must contain letters")
+                return apology("password must contain letters")
             db.execute("UPDATE users SET hash = :new_password WHERE id = :id",
                            {"new_password":generate_password_hash(new_password), "id": session["user_id"]})
             db.commit()
@@ -147,19 +147,17 @@ def change_email():
         email = request.form.get("email")
         new_email = request.form.get("new_email")
         if not email or not new_email:
-            return apology(message="please fill the form")
+            return apology("please fill the form")
         emails = db.execute("SELECT email FROM users WHERE email = :email", {"email": new_email}).fetchone()
         if email != session["email"]:
-            return apology(message="wrong email")
+            return apology("wrong email")
         if emails:
-            return apology(message="email already taken")
+            return apology("email already taken")
         else:
             db.execute("UPDATE users SET email = :new_email WHERE id = :id",
                            {"new_email": new_email, "id": session["user_id"]})
             db.commit()
             session["email"] = new_email
-            #message="Success!\n Your email was successfully changed!"
-            #send_email(new_email, session["username"], message)
             flash("Email updated!")
             return redirect("/")
 
@@ -171,15 +169,13 @@ def add_email():
     else:
         email = request.form.get("email")
         if not email:
-            return apology(message="please enter an email")
+            return apology("please enter an email")
         q = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
         if q:
-            return apology(message="this email already exists")
+            return apology("this email already exists")
         db.execute("UPDATE users SET email = :new_email WHERE id = :id",
                        {"new_email": email, "id": session["user_id"]})
         db.commit()
-        #message="Success!\n Your email was successfully added to your account!"
-        #send_email(email, session["username"], message)
         session["email"] = email
         flash("Email added!")
         return redirect("/")
@@ -243,8 +239,8 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
         email = request.form.get("email")
-        if not username or not password or not confirmation or password != confirmation:
-            return apology(message="please fill the form correctly to register.")
+        if not (username or password or confirmation or email) or password != confirmation:
+            return apology("please fill the form correctly to register.")
     # Checking for username
     c = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchall()
     if c:
@@ -254,35 +250,30 @@ def register():
 
     # password length
     if len(password) < 6:
-        return apology(message="password must be longer than 6 characters")
+        return apology("password must be longer than 6 characters")
     # password must contain numbers
     if password.isalpha():
-        return apology(message="password must contain numbers")
+        return apology("password must contain numbers")
     # password must contain letters
     if password.isdigit():
-        return apology(message="password must contain letters")
+        return apology("password must contain letters")
 
     for c in username:
         if not c.isalpha() and not c.isdigit() and c != "_":
-            return apology(message="Please enter a valid username.")
+            return apology("Please enter a valid username.")
     if len(username) < 1:
-        return apology(message="please enter a username with more than 1 character.")
+        return apology("please enter a username with more than 1 character.")
     hash_pw = generate_password_hash(password)
-    time = get_time()
+    from datetime import date
+    time = date.today()
     try:
-        if email:
-            q = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
-            if q:
-                return apology(message="this email already exists")
-            db.execute("INSERT INTO users(username, hash, email, time) VALUES(:username, :hash_pw, :email, :time)", {"username": username, "hash_pw": hash_pw, "email": email, "time": time})
-            db.commit()
-            message="Congratulations!\n You're now registered on AAA Books!"
-            #send_email(email, username, message)
-        else:
-            db.execute("INSERT INTO users(username, hash, time) VALUES(:username, :hash_pw, :time)", {"username": username, "hash_pw": hash_pw, "time": time})
-            db.commit()
+        q = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
+        if q:
+            return apology("this email already exists")
+        db.execute("INSERT INTO users(username, hash, email, time) VALUES(:username, :hash_pw, :email, :time)", {"username": username, "hash_pw": hash_pw, "email": email, "time": time})
+        db.commit()
     except:
-        return apology(message="something went wrong with the database.")
+        return apology("something went wrong with the database.")
     rows = db.execute("SELECT id, username, email FROM users WHERE username = :username", {"username": username}).fetchone()
     session["user_id"] = rows["id"]
     session["username"] = rows["username"]
