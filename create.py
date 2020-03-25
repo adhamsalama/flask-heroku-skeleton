@@ -1,4 +1,4 @@
-# Creates a db and 2 tables for users and feedback
+# Creates a sqlite3 db and 2 tables for users and feedback
 
 import sqlite3
 
