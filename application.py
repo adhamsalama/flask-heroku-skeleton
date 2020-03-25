@@ -161,24 +161,6 @@ def change_email():
             flash("Email updated!")
             return redirect("/")
 
-@app.route("/settings/add_email", methods=["GET", "POST"])
-@login_required
-def add_email():
-    if request.method == "GET":
-        return render_template("add_email.html")
-    else:
-        email = request.form.get("email")
-        if not email:
-            return apology("please enter an email")
-        q = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
-        if q:
-            return apology("this email already exists")
-        db.execute("UPDATE users SET email = :new_email WHERE id = :id",
-                       {"new_email": email, "id": session["user_id"]})
-        db.commit()
-        session["email"] = email
-        flash("Email added!")
-        return redirect("/")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
