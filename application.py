@@ -70,7 +70,7 @@ def feedback():
         feedback = request.form.get("feedback")
         if not (feedback_type or email or feedback):
             return apology("please fill the form")
-        db.execute("INSERT INTO user_feedback (id, email, feedback, type) VALUES(:id, :email, :feedback, :type)", {"id": session["user_id"], "email": email, "feedback": feedback, "type": feedback_type})
+        db.execute("INSERT INTO feedback (user_id, email, feedback, feedback_type) VALUES(:id, :email, :feedback, :type)", {"id": session["user_id"], "email": email, "feedback": feedback, "type": feedback_type})
         db.commit()
         flash("Feedback submitted! Thanks for your feedback!")
         return redirect("/")
