@@ -1,4 +1,4 @@
-from flask import Flask, session, Blueprint
+from flask import Flask, Blueprint
 from flask_session import Session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from helpers import apology
