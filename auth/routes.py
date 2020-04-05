@@ -1,23 +1,17 @@
-from flask import flash, json, jsonify, redirect, render_template, request, session, Blueprint
-from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
+import os
+from flask import Blueprint, session, request, redirect, render_template, flash, jsonify
+from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import apology, send_email
+from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
+from helpers import apology, login_required
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-import os
-from datetime import datetime, timedelta
 
 
 auth = Blueprint('auth', __name__)
 
-
-# Set up database
-engine = create_engine(os.getenv("DATABASE_URL"))
+engine = create_engine(os.getenv('DATABASE_URL'))
 db = scoped_session(sessionmaker(bind=engine))
-
-
-week_days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
@@ -49,21 +43,6 @@ def login():
         session["user_id"] = rows["id"]
         session["username"] = rows["username"]
         session["email"] = rows["email"]
-        session["uni"] = rows["university"]
-
-        ## Setup the date
-        #today_date = request.form.get('today_date')
-        #if not today_date:
-        #    today_date = datetime.today()
-        #else:
-        #    today_date = today_date.split("-")
-        #    today_date = datetime(int(today_date[2]), int(today_date[0]), int(today_date[1]))
-        #session['today_date_object'] = today_date
-        #session['today_name'] = today_date.strftime("%A")
-        #session['tomorrow_name'] = week_days[(week_days.index(session['today_name']) + 1) % 7]
-        #session['today_date'] = today_date.strftime("%D")
-        #session['tomorrow_date'] = (today_date + timedelta(days=1)).strftime("%D")
-        #session['full_date'] = session['today_name'] + ", " + today_date.strftime("%b %d %Y")
 
         # Redirect user to home page
         return redirect("/")
@@ -73,6 +52,7 @@ def login():
         return render_template("login.html")
 
 
+@login_required
 @auth.route("/logout")
 def logout():
     """Log user out"""
@@ -88,18 +68,16 @@ def logout():
 def register():
     """Register user"""
     if request.method == "GET":
-        session.clear()
         return render_template("register.html")
     else:
         username = request.form.get("username")
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
         email = request.form.get("email")
-        university = request.form.get("university")
-        if not username or not password or not confirmation or password != confirmation:
+        if not (username or password or confirmation or email) or password != confirmation:
             return apology("please fill the form correctly to register.")
     # Checking for username
-    c = db.execute("SELECT username FROM users WHERE username ILIKE :username", {"username": username}).fetchall()
+    c = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchall()
     if c:
         return apology("username already taken")
 
@@ -107,68 +85,38 @@ def register():
 
     # password length
     if len(password) < 6:
-        return apology(message="password must be longer than 6 characters")
+        return apology("password must be longer than 6 characters")
     # password must contain numbers
     if password.isalpha():
-        return apology(message="password must contain numbers")
+        return apology("password must contain numbers")
     # password must contain letters
     if password.isdigit():
-        return apology(message="password must contain letters")
+        return apology("password must contain letters")
 
     for c in username:
         if not c.isalpha() and not c.isdigit() and c != "_":
-            return apology(message="Please enter a valid username.")
-    if len(username) < 3:
-        return apology("please enter a username with 3 or more characters")
-    if len(username) > 50:
-        return apology("username limit is 50 characters")
+            return apology("Please enter a valid username.")
+    if len(username) < 1:
+        return apology("please enter a username with more than 1 character.")
     hash_pw = generate_password_hash(password)
+    from datetime import date
+    time = date.today()
     try:
-        if email:
-            if len(email) > 70:
-                return apology("email limit is 50 characters")
-            q = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
-            if q:
-                return apology("this email already exists")
-        if not email:
-            email = None
-        if university:
-            if len(university) > 70:
-                return apology("university limit is 70 characters")
-            university = university.title()
-        else:
-            university = None
-        db.execute("INSERT INTO users(username, hash, email, date, university) VALUES(:username, :hash_pw, :email, CURRENT_DATE, :university)",
-                   {"username": username, "hash_pw": hash_pw, "email": email, "university": university})
+        q = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
+        if q:
+            return apology("this email already exists")
+        db.execute("""INSERT INTO users(username, hash, email, registeration) VALUES(:username, :hash_pw, :email, :time)""",
+                   {"username": username, "hash_pw": hash_pw, "email": email, "time": time})
         db.commit()
-    except:
-        return apology("something went wrong with the database.")
-    if email:
-        try:
-            send_email(email, username, "Registeration for Student Helper", "Congratulations!\n You're now registered on Student Helper!")
-        except Exception as x:
-            print(x)
-    rows = db.execute("SELECT id, username, email, university FROM users WHERE username = :username", {"username": username}).fetchone()
+    except Exception as x:
+        return apology(x)
+    rows = db.execute("SELECT id, username, email FROM users WHERE username = :username",
+                      {"username": username}).fetchone()
     session["user_id"] = rows["id"]
     session["username"] = rows["username"]
     session["email"] = rows["email"]
-    session["uni"] = rows["university"]
     flash("You're now registered!")
-
-    # Setup the dates
-    today_date = request.form.get('today_date')
-    if not today_date:
-        return apology('please enable javascript your account has been registered')
-    today_date = today_date.split("-")
-    today_date = datetime(int(today_date[2]), int(today_date[0]), int(today_date[1]))
-    session['today_date_object'] = today_date
-    session['today_name'] = today_date.strftime("%A")
-    session['tomorrow_name'] = week_days[(week_days.index(session['today_name']) + 1) % 7]
-    session['today_date'] = today_date.strftime("%D")
-    session['tomorrow_date'] = (today_date + timedelta(days=1)).strftime("%D")
-    session['full_date'] = session['today_name'] + ", " + today_date.strftime("%b %d %Y")
     return redirect("/")
-
 
 @auth.route("/check", methods=["GET"])
 def check():
@@ -177,7 +125,7 @@ def check():
     email = request.args.get("email")
     username = request.args.get("username")
     email = request.args.get("email")
-    verify_username = db.execute("SELECT username FROM users WHERE username ILIKE :username", {"username": username}).fetchone()
+    verify_username = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchone()
     if email:
         verify_email = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
         if verify_email and verify_username:
@@ -190,6 +138,7 @@ def check():
         return jsonify("Username already taken.")
     return jsonify(True)
 
+
 def errorhandler(e):
     """Handle error"""
     if not isinstance(e, HTTPException):
@@ -200,4 +149,3 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     auth.errorhandler(code)(errorhandler)
-    
