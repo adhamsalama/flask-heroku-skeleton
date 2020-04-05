@@ -67,7 +67,10 @@ def logout():
 @auth.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
+
+
     if request.method == "GET":
+        session.clear()
         return render_template("register.html")
     else:
         username = request.form.get("username")
@@ -108,8 +111,9 @@ def register():
         db.execute("""INSERT INTO users(username, hash, email, registeration) VALUES(:username, :hash_pw, :email, :time)""",
                    {"username": username, "hash_pw": hash_pw, "email": email, "time": time})
         db.commit()
-    except Exception as x:
-        return apology(x)
+    except:
+        return apology("something went wrong with the database")
+        
     rows = db.execute("SELECT id, username, email FROM users WHERE username = :username",
                       {"username": username}).fetchone()
     session["user_id"] = rows["id"]
