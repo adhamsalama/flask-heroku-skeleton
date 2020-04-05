@@ -1,2 +1,0 @@
-CREATE TABLE 'users' ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 'username' VARCHAR(32) NOT NULL, 'email' VARCHAR(64) NOT NULL, 'hash' TEXT NOT NULL, 'registeration' DATETIME NOT NULL);
-CREATE TABLE 'feedback' ('user_id' INTEGER NOT NULL, 'email' VARCHAR(64) NOT NULL, 'feedback' TEXT NOT NULL, 'feedback_type' VARCHAR(10) NOT NULL);
