@@ -1,22 +1,11 @@
-import os
 from flask import flash, redirect, render_template, request, session, Blueprint
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from helpers import apology, login_required
+from helpers import apology, login_required, connectdb
 
 main = Blueprint('main', __name__)
 
-
-# Check for environment variable
-if not os.getenv("DATABASE_URL"):
-    raise RuntimeError("DATABASE_URL is not set")
-
-
-# Set up database
-engine = create_engine(os.getenv("DATABASE_URL"))
-db = scoped_session(sessionmaker(bind=engine))
+db = connectdb()
 
 
 # Ensure responses aren't cached

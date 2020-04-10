@@ -1,17 +1,13 @@
-import os
 from flask import Blueprint, session, request, redirect, render_template, flash, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
-from helpers import apology, login_required
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-
+from helpers import apology, login_required, connectdb
 
 auth = Blueprint('auth', __name__)
 
-engine = create_engine(os.getenv('DATABASE_URL'))
-db = scoped_session(sessionmaker(bind=engine))
+db = connectdb()
+
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
